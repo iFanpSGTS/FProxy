@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <h1 align="center">🚧 FProxy 🚧</h1>
 
 <p align="center">
@@ -22,3 +23,6 @@ Underdevelopment
 | Custom Cookies | :hourglass: Not started |
 | Under Attack Mode (Stages) | :hourglass: Not started |
 | Traffic pattern analyzer | :hourglass: Not started |
+=======
+
+>>>>>>> a31bd4cf75369b089ae37bf294d694201bc58a06
