@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA Verification</title>
+</head>
+<body>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.captcha-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 300px;
+}
+
+h1 {
+    margin: 0 0 15px;
+    color: #333;
+}
+
+p {
+    color: #555;
+    font-size: 14px;
+}
+
+.captcha-image img {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.captcha-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.captcha-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    width: 100%;
+}
+
+.captcha-button:hover {
+    background-color: #45a049;
+}
+
+    </style>
+    <div class="captcha-container">
+        <h1>CAPTCHA Verification</h1>
+        <p>Please prove you're not a bot by completing the CAPTCHA below:</p>
+        <form action="/validate-captcha" method="POST">
+            <div class="captcha-image">
+                <img src="data:image/png;base64,{{.CaptchaImg}}" alt="CAPTCHA">
+            </div>
+            <input type="hidden" name="captcha_id" value="{{.CaptchaID}}">
+            <input type="text" name="captcha" placeholder="Enter the text above" required class="captcha-input">
+            <button type="submit" class="captcha-button">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

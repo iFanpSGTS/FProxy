@@ -1,0 +1,8 @@
+[1] - Custom rules
+[2] - Checking headers
+[3] - Custom Cookies
+[4] - Ratelimit
+[5] - UAM
+[6] - Traffic Analyzer
+[7] - Log levels
+[8] - Custom Error HTML
