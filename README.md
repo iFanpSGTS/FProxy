@@ -21,4 +21,4 @@ Underdevelopment
 | Custom Error Pages | :construction: In progress |
 | Custom Cookies | :hourglass: Not started |
 | Under Attack Mode (Stages) | :hourglass: Not started |
-| Traffic pattern analyzer | :hourglass: Not started |
+| Traffic pattern analyzer | :construction: In progress |
