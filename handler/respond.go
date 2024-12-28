@@ -9,6 +9,7 @@ import (
 
 var (
 	ratelimitTemplate = "assets/html/ratelimit.html"
+	unavailableBackend	  = "assets/html/unavailable.html"
 )
 
 func getResponseBody(title string, msg string) string {
@@ -32,11 +33,24 @@ func loadErrorTemplate(templateName string, data map[string]interface{}) (string
 	return buf.String(), nil
 }
 
+func RespondUnavailable(w http.ResponseWriter, r *http.Request) {
+	response, err := loadErrorTemplate(
+		unavailableBackend,
+		map[string]interface{}{
+		},
+	)
+	if err != nil {
+		response = getResponseBody("502", "Bad Gateaway")
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprint(w, response)
+}
+
 func RespondRatelimit(w http.ResponseWriter, r *http.Request) {
 	response, err := loadErrorTemplate(
 		ratelimitTemplate,
 		map[string]interface{}{
-			"FProxyID": "ABCD",
 		},
 	)
 	if err != nil {

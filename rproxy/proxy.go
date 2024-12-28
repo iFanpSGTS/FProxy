@@ -34,7 +34,7 @@ func proxyToBackend(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	resp, err := client.Do(proxyReq)
 	if err != nil {
-		http.Error(w, "Failed to connect to backend server", http.StatusBadGateway)
+		handler.RespondUnavailable(w,r)
 		return
 	}
 	defer resp.Body.Close()
@@ -45,7 +45,7 @@ func proxyToBackend(w http.ResponseWriter, r *http.Request) {
 
 func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 	ip := middleware.GetClientIP(r)
-
+	
 	if !captcha.IsCaptchaSolved(r){
 		http.Redirect(w, r, "/captcha", http.StatusFound)
 		return
@@ -56,7 +56,7 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	proxyToBackend(w, r)
-
+	
 	// Invalidate the CAPTCHA cookie after the proxy request
 	http.SetCookie(w, &http.Cookie{
 		Name:   "captcha_solved",
