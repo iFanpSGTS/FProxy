@@ -7,9 +7,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"fproxy/middleware"
 	"html/template"
 	"fproxy/handler"
-	"fproxy/middleware"
 )
 
 const (

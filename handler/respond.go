@@ -10,6 +10,7 @@ import (
 var (
 	ratelimitTemplate = "assets/html/ratelimit.html"
 	unavailableBackend	  = "assets/html/unavailable.html"
+	blockedUser			= "assets/html/detected.html"
 )
 
 func getResponseBody(title string, msg string) string {
@@ -36,6 +37,20 @@ func loadErrorTemplate(templateName string, data map[string]interface{}) (string
 func RespondUnavailable(w http.ResponseWriter, r *http.Request) {
 	response, err := loadErrorTemplate(
 		unavailableBackend,
+		map[string]interface{}{
+		},
+	)
+	if err != nil {
+		response = getResponseBody("502", "Bad Gateaway")
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprint(w, response)
+}
+
+func RespondBlocked(w http.ResponseWriter, r *http.Request) {
+	response, err := loadErrorTemplate(
+		blockedUser,
 		map[string]interface{}{
 		},
 	)

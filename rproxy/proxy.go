@@ -17,7 +17,7 @@ var (
 	rl = middleware.NewRateLimiter(requestLimit, timeWindow)
 )
 
-func proxyToBackend(w http.ResponseWriter, r *http.Request) {
+func ProxyToBackend(w http.ResponseWriter, r *http.Request) {
 	backend, err := url.Parse(backendURL)
 	if err != nil {
 		http.Error(w, "Invalid backend URL", http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 		handler.RespondRatelimit(w, r)
 		return
 	}
-	proxyToBackend(w, r)
+	ProxyToBackend(w, r)
 	
 	// Invalidate the CAPTCHA cookie after the proxy request
 	http.SetCookie(w, &http.Cookie{
