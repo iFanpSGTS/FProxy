@@ -10,7 +10,8 @@ import (
 	"regexp"
 )
 
-var badUa = []string{"python", "curl", "anon", "mozilla"}
+var badUa = []string{"python", "curl", "test", "mzilla/100.0"}
+var badMethod = []string{"copy", "paste", "get"}
 
 func TrafficAnalyzerMiddleware(next http.Handler) (http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +34,12 @@ func TrafficAnalyzerMiddleware(next http.Handler) (http.Handler) {
 
 }
 
-func checkMaliciousUA(ua string, badUa []string) bool {
-	for _, badUa := range badUa {
-		pattern := fmt.Sprintf(`\b%s\b`, regexp.QuoteMeta(badUa))
+func checkMaliciousContains(str string, mcs []string) bool {
+	for _, mcs := range mcs {
+		fmt.Println(mcs)
+		pattern := fmt.Sprintf(`\b%s\b`, regexp.QuoteMeta(mcs))
 		re := regexp.MustCompile(pattern)
-		if re.MatchString(strings.ToLower(ua)) {
+		if re.MatchString(strings.ToLower(str)) {
 			return false
 		}
 	}
@@ -47,7 +49,7 @@ func checkMaliciousUA(ua string, badUa []string) bool {
 func isMaliciousRequest(r *http.Request) bool {
 	// UA
 	ua := r.UserAgent()
-	if !checkMaliciousUA(ua, badUa) {
+	if !checkMaliciousContains(ua, badUa) {
 		return true
 	}
 
@@ -61,7 +63,9 @@ func isMaliciousRequest(r *http.Request) bool {
 	}
 
 	// METHODS
-	if r.Method == "TRACE" || r.Method == "OPTIONS" {
+	method := r.Method
+	fmt.Println(method)
+	if !checkMaliciousContains(method, badMethod) {
 		return true
 	}
 

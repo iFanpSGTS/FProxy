@@ -13,7 +13,7 @@ var (
 	blockedUser			= "assets/html/detected.html"
 )
 
-func getResponseBody(title string, msg string) string {
+func GetResponseBody(title string, msg string) string {
 	return fmt.Sprintf("<html><head><title>%s</title></head><body>%s</body></html>", title, msg)
 }
 
@@ -41,7 +41,7 @@ func RespondUnavailable(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		response = getResponseBody("502", "Bad Gateaway")
+		response = GetResponseBody("502", "Bad Gateaway")
 	}
 
 	w.WriteHeader(http.StatusNotFound)
@@ -55,7 +55,7 @@ func RespondBlocked(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		response = getResponseBody("502", "Bad Gateaway")
+		response = GetResponseBody("502", "Bad Gateaway")
 	}
 
 	w.WriteHeader(http.StatusNotFound)
@@ -69,7 +69,7 @@ func RespondRatelimit(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	if err != nil {
-		response = getResponseBody("RateLimit", "You have been exceeded ratelimit!")
+		response = GetResponseBody("RateLimit", "You have been exceeded ratelimit!")
 	}
 
 	w.WriteHeader(http.StatusTooManyRequests)

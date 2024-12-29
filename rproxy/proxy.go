@@ -19,12 +19,12 @@ var (
 func ProxyToBackend(w http.ResponseWriter, r *http.Request) {
 	backend, err := url.Parse(backendURL)
 	if err != nil {
-		http.Error(w, "Invalid backend URL", http.StatusInternalServerError)
+		handler.GetResponseBody("HTTP Error", "BackendURL Error")
 		return
 	}
 	proxyReq, err := http.NewRequest(r.Method, backend.ResolveReference(r.URL).String(), r.Body)
 	if err != nil {
-		http.Error(w, "Failed to create proxy request", http.StatusInternalServerError)
+		handler.GetResponseBody("HTTP Error", "Front Request -> Backend Error")
 		return
 	}
 
