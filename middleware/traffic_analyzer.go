@@ -6,7 +6,11 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"fmt"
+	"regexp"
 )
+
+var badUa = []string{"python", "curl", "anon", "mozilla"}
 
 func TrafficAnalyzerMiddleware(next http.Handler) (http.Handler) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,15 +27,27 @@ func TrafficAnalyzerMiddleware(next http.Handler) (http.Handler) {
 			handler.RespondBlocked(w,r)
 			return
 		}
-		
+
 		next.ServeHTTP(w, r)
 	})
 
 }
 
+func checkMaliciousUA(ua string, badUa []string) bool {
+	for _, badUa := range badUa {
+		pattern := fmt.Sprintf(`\b%s\b`, regexp.QuoteMeta(badUa))
+		re := regexp.MustCompile(pattern)
+		if re.MatchString(strings.ToLower(ua)) {
+			return false
+		}
+	}
+	return true
+}
+
 func isMaliciousRequest(r *http.Request) bool {
 	// UA
-	if strings.Contains(strings.ToLower(r.UserAgent()), "mozilla") || strings.Contains(strings.ToLower(r.UserAgent()), "python") {
+	ua := r.UserAgent()
+	if !checkMaliciousUA(ua, badUa) {
 		return true
 	}
 

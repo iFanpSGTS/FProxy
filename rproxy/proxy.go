@@ -1,7 +1,6 @@
 package rproxy
 
 import (
-	"fproxy/captcha"
 	"fproxy/handler"
 	"fproxy/middleware"
 	"io"
@@ -46,7 +45,7 @@ func ProxyToBackend(w http.ResponseWriter, r *http.Request) {
 func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 	ip := middleware.GetClientIP(r)
 	
-	if !captcha.IsCaptchaSolved(r){
+	if !handler.VcaptchaCookies(r){
 		http.Redirect(w, r, "/captcha", http.StatusFound)
 		return
 	}

@@ -6,3 +6,39 @@
 [6] - Traffic Analyzer
 [7] - Log levels
 [8] - Custom Error HTML
+
+############### Traffic Analyzer TODO ###################
+Suspicious User Agents:
+Bots or malicious tools often use identifiable or generic user-agent strings (e.g., curl, Python-requests, etc.).
+Rate of Requests:
+High-frequency requests from the same IP may indicate a brute-force attack or web scraping.
+
+Suspicious Query Parameters:
+Parameters containing SQL, XSS payloads, or unexpected encodings might signify injection attempts (e.g., ' OR 1=1, <script>, etc.)
+
+Unusual HTTP Methods:
+Unexpected methods like TRACE, OPTIONS, or DELETE could indicate malicious probing.
+
+Invalid or Missing Headers:
+Headers like Host, Referer, or Content-Type being invalid or missing may indicate tampering.
+
+Known Bad IP Addresses:
+Requests from IPs flagged in threat intelligence feeds or blacklists.
+Malformed or Unexpected Payloads:
+POST data containing unexpected or overly long fields may indicate buffer overflow or injection attacks.
+
+Request Timing and Distribution:
+Requests at odd times or from geographically implausible locations for the user.
+
+Techniques for Malicious Pattern Detection:
+Signature-Based Detection:
+Match known attack patterns using regex or predefined rules.
+
+Anomaly-Based Detection:
+Monitor baseline traffic and flag significant deviations.
+
+Threat Intelligence Integration:
+Use databases of malicious IPs, user agents, or URLs for real-time detection.
+
+Behavioral Analysis:
+Identify behavior patterns like repetitive requests or bot-like navigation.

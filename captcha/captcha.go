@@ -53,7 +53,6 @@ func CaptchaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	key, img, err := generateCaptcha()
-	// fmt.Println("Base64 CAPTCHA Image:", img)
 	if err != nil {
 		http.Error(w, "Failed to generate CAPTCHA", http.StatusInternalServerError)
 		return
@@ -83,7 +82,7 @@ func ValidateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
 	captchaMu.Lock()
 	expectedValue, exists := captchas[captchaID]
 	if exists {
-		delete(captchas, captchaID) // Remove solved CAPTCHA
+		delete(captchas, captchaID)
 	}
 	captchaMu.Unlock()
 
@@ -100,9 +99,4 @@ func ValidateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
 		Expires: time.Now().Add(1 * time.Minute), // Expires in 5 minutes
 	})
 	http.Redirect(w, r, "/", http.StatusFound)
-}
-
-func IsCaptchaSolved(r *http.Request) bool {
-	cookie, err := r.Cookie("captcha_solved")
-	return err == nil && cookie.Value == "true"
 }
