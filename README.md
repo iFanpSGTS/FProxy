@@ -22,3 +22,4 @@ Underdevelopment
 | Custom Cookies | :hourglass: Not started |
 | Under Attack Mode (Stages) | :hourglass: Not started |
 | Traffic pattern analyzer | :construction: In progress |
+| Log Levels | :construction: In progress |
