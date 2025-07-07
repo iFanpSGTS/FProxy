@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"fproxy/handler"
 	"net/http"
-	"os"
+	// "os"
 	"regexp"
 	"strings"
 	"sync"
@@ -13,6 +13,8 @@ import (
 
 var badUa = []string{"python", "curl", "test", "mzilla/100.0"}
 var badMethod = []string{"copy", "wasd", "proffff"}
+var concurrent = make(chan struct{}, 1)
+var slots = make(map[string]chan struct{})
 
 type loggingResponseWriter struct {
 	http.ResponseWriter
@@ -54,31 +56,49 @@ func IncrementBlockedCount() { // used for globals
 
 func TrafficAnalyzerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
 		clientIP := r.RemoteAddr
-
-		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
-
+		chip := GetClientIP(r)
 		mu.Lock()
-		uniqueIPs[clientIP] = struct{}{}
-		totalRequests++
-		reqTimestamps = append(reqTimestamps, start)
-		// Clean up old timestamps for RPS calculation (last 1 minute)
-		cutoff := time.Now().Add(-1 * time.Minute)
-		i := 0
-		for ; i < len(reqTimestamps); i++ {
-			if reqTimestamps[i].After(cutoff) {
-				break
-			}
+		ch, ok := slots[chip]
+		if !ok {
+			ch = make(chan struct{}, 2) // limit 1 per chip
+			slots[chip] = ch
 		}
-		reqTimestamps = reqTimestamps[i:]
 		mu.Unlock()
+		select {
+		case ch <- struct{}{}:
+			defer func() {
+				<-ch
+			}()
 
-		if isMaliciousRequest(r){
-			handler.RespondBlocked(lrw, r)
-			IncrementBlockedCount()
-		} else {
-			next.ServeHTTP(lrw, r)
+			start := time.Now()
+
+			lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
+
+			mu.Lock()
+			uniqueIPs[clientIP] = struct{}{}
+			totalRequests++
+			reqTimestamps = append(reqTimestamps, start)
+			// Clean up old timestamps for RPS calculation (last 1 minute)
+			cutoff := time.Now().Add(-1 * time.Minute)
+			i := 0
+			for ; i < len(reqTimestamps); i++ {
+				if reqTimestamps[i].After(cutoff) {
+					break
+				}
+			}
+			reqTimestamps = reqTimestamps[i:]
+			mu.Unlock()
+
+			if isMaliciousRequest(r){
+				handler.RespondBlocked(lrw, r)
+				IncrementBlockedCount()
+			} else {
+				next.ServeHTTP(lrw, r)
+			}
+		default:
+			handler.RespondBlocked(w, r)
+			return 
 		}
 
 		printStats()
@@ -90,11 +110,11 @@ func printStats() {
 	defer mu.Unlock()
 	rps := float64(len(reqTimestamps)) / 60.0
 
-	fmt.Fprint(os.Stdout, "\033[2J\033[H")
+	// fmt.Fprint(os.Stdout, "\033[2J\033[H")
 
 	fmt.Println("========= FProxy WAF Monitor =========")
 	fmt.Printf("Time:           %s\n", time.Now().Format("15:04:05"))
-	fmt.Printf("Unique IPs:     %v\n", uniqueIPs)
+	fmt.Printf("Unique IPs:     %v\n", len(uniqueIPs))
 	fmt.Printf("Total Requests: %d\n", totalRequests)
 	fmt.Printf("Blocked:        %d\n", blockedCount)
 	fmt.Printf("RPS (1m avg):   %.2f\n", rps)

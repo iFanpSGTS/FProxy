@@ -1,22 +1,28 @@
 package rproxy
 
 import (
+	"fmt"
 	"fproxy/handler"
 	"fproxy/middleware"
 	"io"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 )
 
 var backendURL = "http://localhost:8000"
+var concurrent = make(chan struct{}, 1)
+var slots = make(map[string]chan struct{})
 var (
+	mu    sync.Mutex
 	requestLimit      = 5              // Max requests allowed
 	timeWindow        = 1 * time.Minute // Time window for rate limiting
 	rl = middleware.NewRateLimiter(requestLimit, timeWindow)
 )
 
 func ProxyToBackend(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("catch here backend")
 	backend, err := url.Parse(backendURL)
 	if err != nil {
 		handler.GetResponseBody("HTTP Error", "BackendURL Error")
@@ -44,24 +50,34 @@ func ProxyToBackend(w http.ResponseWriter, r *http.Request) {
 
 func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 	ip := middleware.GetClientIP(r)
-	
-	if !handler.VcaptchaCookies(r){
-		http.Redirect(w, r, "/captcha", http.StatusFound)
+	fmt.Println("Proxy request from IP:", ip)
+	mu.Lock()
+    ch, ok := slots[ip]
+    if !ok {
+        ch = make(chan struct{}, 2) // limit 1 per IP
+        slots[ip] = ch
+    }
+    mu.Unlock()
+	select {
+	case ch <- struct{}{}:
+		defer func() { <-ch }()
+		
+		if !handler.VcaptchaCookies(r){
+			http.Redirect(w, r, "/captcha", http.StatusFound)
+			return
+		}
+		// Proxy logic
+		if !rl.AllowRequest(ip){
+			middleware.IncrementBlockedCount()
+			handler.RespondRatelimit(w, r)
+			return
+		}
+		ProxyToBackend(w, r)
+		
+		// Invalidate the CAPTCHA cookie after the proxy request
+		handler.SetCaptchaSolvedCookie(w)
+	default:
+		handler.RespondUnavailable(w, r)
 		return
 	}
-	// Proxy logic
-	if !rl.AllowRequest(ip){
-		middleware.IncrementBlockedCount()
-		handler.RespondRatelimit(w, r)
-		return
-	}
-	ProxyToBackend(w, r)
-	
-	// Invalidate the CAPTCHA cookie after the proxy request
-	http.SetCookie(w, &http.Cookie{
-		Name:   "captcha_solved",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1, // Deletes the cookie
-	})
 }
