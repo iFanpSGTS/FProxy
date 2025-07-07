@@ -25,7 +25,7 @@ var (
 )
 
 var (
-	slots	  = make(map[string]chan struct{})
+	globalLimiter = middleware.NewConcurrentLimiter(1) // 2 = limit per IP
 	captchaMu  sync.Mutex
 	captchas   = map[string]string{}
 	rl = middleware.NewRateLimiter(requestLimit, timeWindow)
@@ -51,41 +51,31 @@ func LoadTemplate(data map[string]interface{}) (string,error) {
 func CaptchaHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("catch here")
 	ip := middleware.GetClientIP(r)
-	mu.Lock()
-	ch, ok := slots[ip]
-	if !ok {
-		ch = make(chan struct{}, 1) // limit 1 per IP
-		slots[ip] = ch
+	if !rl.AllowRequest(ip){
+		handler.RespondRatelimit(w, r)
+		return
 	}
-	mu.Unlock()
-	select {
-	case ch <- struct{}{}:
-		defer func() { <-ch }()
-
-		if !rl.AllowRequest(ip){
-			handler.RespondRatelimit(w, r)
-			return
-		}
-		key, img, err := generateCaptcha()
-		if err != nil {
-			http.Error(w, "Failed to generate CAPTCHA", http.StatusInternalServerError)
-			return
-		}
-		
-		response, errs := LoadTemplate(map[string]interface{}{
-			"CaptchaID": key,
-			"CaptchaImg": img,
-			},)
-			if errs != nil {
-				http.Error(w, "Error showing captcha", http.StatusInternalServerError)
-				return
-			}
-		handler.SetCaptchaHeaders(w,r)
-		fmt.Fprint(w, response)
-	default:
+	if !globalLimiter.Acquire(ip) {
 		handler.RespondUnavailable(w, r)
 		return
 	}
+	defer globalLimiter.Release(ip)
+	key, img, err := generateCaptcha()
+	if err != nil {
+		http.Error(w, "Failed to generate CAPTCHA", http.StatusInternalServerError)
+		return
+	}
+	
+	response, errs := LoadTemplate(map[string]interface{}{
+		"CaptchaID": key,
+		"CaptchaImg": img,
+		},)
+		if errs != nil {
+			http.Error(w, "Error showing captcha", http.StatusInternalServerError)
+			return
+		}
+	handler.SetCaptchaHeaders(w,r)
+	fmt.Fprint(w, response)
 }
 
 func ValidateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
