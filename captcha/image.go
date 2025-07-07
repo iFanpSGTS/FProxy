@@ -26,16 +26,51 @@ func generateCaptcha() (string, string, error) {
 	dc.SetColor(color.White)
 	dc.Clear()
 
-	dc.SetColor(color.Black)
-	dc.SetFontFace(font)
-	dc.DrawStringAnchored(value, float64(captchaWidth/2), float64(captchaHeight/2), 0.5, 0.5)
+	// Add background noise: random lines
+	for i := 0; i < 10; i++ {
+		dc.SetRGBA(rand.Float64(), rand.Float64(), rand.Float64(), 0.7)
+		x1 := rand.Float64() * float64(captchaWidth)
+		y1 := rand.Float64() * float64(captchaHeight)
+		x2 := rand.Float64() * float64(captchaWidth)
+		y2 := rand.Float64() * float64(captchaHeight)
+		dc.SetLineWidth(rand.Float64()*2 + 1)
+		dc.DrawLine(x1, y1, x2, y2)
+		dc.Stroke()
+	}
 
-	// Add noise
-	for i := 0; i < 2000; i++ {
+	// Draw each character with random rotation, color, and position
+	dc.SetFontFace(font)
+	charSpacing := float64(captchaWidth) / float64(len(value)+1)
+	for i, c := range value {
+		angle := rand.Float64()*0.6 - 0.3 // -0.3 to +0.3 radians
+		x := charSpacing*float64(i+1) + rand.Float64()*4 - 2
+		y := float64(captchaHeight)/2 + rand.Float64()*10 - 5
+		dc.Push()
+		dc.RotateAbout(angle, x, y)
+		dc.SetRGB(rand.Float64()*0.5, rand.Float64()*0.5, rand.Float64()*0.5)
+		dc.DrawStringAnchored(string(c), x, y, 0.5, 0.5)
+		dc.Pop()
+	}
+
+	// Add more noise: random dots
+	for i := 0; i < 3000; i++ {
 		x := rand.Intn(captchaWidth)
 		y := rand.Intn(captchaHeight)
-		dc.SetRGB(rand.Float64(), rand.Float64(), rand.Float64())
-		dc.DrawPoint(float64(x), float64(y), 1)
+		dc.SetRGBA(rand.Float64(), rand.Float64(), rand.Float64(), rand.Float64()*0.7)
+		dc.DrawPoint(float64(x), float64(y), rand.Float64()*1.5+0.5)
+	}
+
+	// Optionally: add random arcs/curves
+	for i := 0; i < 3; i++ {
+		dc.SetRGBA(rand.Float64(), rand.Float64(), rand.Float64(), 0.5)
+		x := rand.Float64() * float64(captchaWidth)
+		y := rand.Float64() * float64(captchaHeight)
+		r := rand.Float64()*30 + 20
+		start := rand.Float64() * 2 * 3.1415
+		end := start + rand.Float64()*3.1415
+		dc.SetLineWidth(rand.Float64()*2 + 1)
+		dc.DrawArc(x, y, r, start, end)
+		dc.Stroke()
 	}
 
 	// Store the CAPTCHA key and value
