@@ -1,42 +1,108 @@
 package middleware
 
 import (
-	"fproxy/handler"
-	"log"
-	"net/http"
-	"strings"
-	"time"
 	"fmt"
+	"fproxy/handler"
+	"net/http"
+	"os"
 	"regexp"
+	"strings"
+	"sync"
+	"time"
 )
 
 var badUa = []string{"python", "curl", "test", "mzilla/100.0"}
-var badMethod = []string{"copy", "paste", "get"}
+var badMethod = []string{"copy", "wasd", "proffff"}
 
-func TrafficAnalyzerMiddleware(next http.Handler) (http.Handler) {
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
+var (
+	mu            sync.Mutex
+	uniqueIPs     = make(map[string]struct{})
+	totalRequests int
+	blockedCount  int
+	reqTimestamps []time.Time
+	statsUpdates  = make(chan struct{}, 1)
+)
+
+func init() {
+    // Start the stats printer goroutine
+    go func() {
+        for range statsUpdates {
+            printStats()
+        }
+    }()
+}
+
+func IncrementBlockedCount() { // used for globals
+    mu.Lock()
+    blockedCount++
+    mu.Unlock()
+	select {
+	case statsUpdates <- struct{}{}:
+	default:
+	}
+}
+
+func TrafficAnalyzerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 		clientIP := r.RemoteAddr
-		userAgent := r.UserAgent()
-		method := r.Method
-		url := r.URL.String()
-		timestamp := time.Now().Format(time.RFC3339)
 
-		// Log the request details
-		log.Printf("Request received: IP=%s, Method=%s, URL=%s, UserAgent=%s, Timestamp=%s", clientIP, method, url, userAgent, timestamp)
+		lrw := &loggingResponseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
-		if isMaliciousRequest(r) {
-			handler.RespondBlocked(w,r)
-			return
+		mu.Lock()
+		uniqueIPs[clientIP] = struct{}{}
+		totalRequests++
+		reqTimestamps = append(reqTimestamps, start)
+		// Clean up old timestamps for RPS calculation (last 1 minute)
+		cutoff := time.Now().Add(-1 * time.Minute)
+		i := 0
+		for ; i < len(reqTimestamps); i++ {
+			if reqTimestamps[i].After(cutoff) {
+				break
+			}
+		}
+		reqTimestamps = reqTimestamps[i:]
+		mu.Unlock()
+
+		if isMaliciousRequest(r){
+			handler.RespondBlocked(lrw, r)
+			IncrementBlockedCount()
+		} else {
+			next.ServeHTTP(lrw, r)
 		}
 
-		next.ServeHTTP(w, r)
+		printStats()
 	})
+}
 
+func printStats() {
+	mu.Lock()
+	defer mu.Unlock()
+	rps := float64(len(reqTimestamps)) / 60.0
+
+	fmt.Fprint(os.Stdout, "\033[2J\033[H")
+
+	fmt.Println("========= FProxy WAF Monitor =========")
+	fmt.Printf("Time:           %s\n", time.Now().Format("15:04:05"))
+	fmt.Printf("Unique IPs:     %v\n", uniqueIPs)
+	fmt.Printf("Total Requests: %d\n", totalRequests)
+	fmt.Printf("Blocked:        %d\n", blockedCount)
+	fmt.Printf("RPS (1m avg):   %.2f\n", rps)
+	fmt.Println("======================================")
 }
 
 func checkMaliciousContains(str string, mcs []string) bool {
 	for _, mcs := range mcs {
-		fmt.Println(mcs)
 		pattern := fmt.Sprintf(`\b%s\b`, regexp.QuoteMeta(mcs))
 		re := regexp.MustCompile(pattern)
 		if re.MatchString(strings.ToLower(str)) {
@@ -64,7 +130,6 @@ func isMaliciousRequest(r *http.Request) bool {
 
 	// METHODS
 	method := r.Method
-	fmt.Println(method)
 	if !checkMaliciousContains(method, badMethod) {
 		return true
 	}

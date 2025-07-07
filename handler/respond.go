@@ -11,6 +11,7 @@ var (
 	ratelimitTemplate = "assets/html/ratelimit.html"
 	unavailableBackend	  = "assets/html/unavailable.html"
 	blockedUser			= "assets/html/detected.html"
+	invalidcapt	= "assets/html/invalidcapt.html"
 )
 
 func GetResponseBody(title string, msg string) string {
@@ -32,6 +33,21 @@ func loadErrorTemplate(templateName string, data map[string]interface{}) (string
 	}
 
 	return buf.String(), nil
+}
+
+func RespondInvalidCaptcha(w http.ResponseWriter, r *http.Request) {
+	response, err := loadErrorTemplate(
+		invalidcapt,
+		map[string]interface{}{
+			"Captcha": "Captcha is invalid!",
+		},
+	)
+	if err != nil {
+		response = GetResponseBody("502", "Bad Gateaway")
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprint(w, response)
 }
 
 func RespondUnavailable(w http.ResponseWriter, r *http.Request) {

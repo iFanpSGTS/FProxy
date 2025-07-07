@@ -7,72 +7,110 @@
 </head>
 <body>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@400;700&display=swap');
+
         body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.captcha-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 300px;
-}
-
-.footer {
-            margin-top: 40px;
-            font-size: 14px;
-            color: #666;
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+            background: linear-gradient(135deg, #f7e7ce 0%, #e6cba8 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
-h1 {
-    margin: 0 0 15px;
-    color: #333;
-}
+        /* Grain effect overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            opacity: 0.25;
+            z-index: 0;
+        }
 
-p {
-    color: #555;
-    font-size: 14px;
-}
+        .captcha-container {
+            background: #fffbe6;
+            padding: 28px 24px 24px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(80, 60, 20, 0.18), 0 1.5px 0 #e6cba8;
+            text-align: center;
+            width: 340px;
+            border: 2.5px solid #bfa46d;
+            position: relative;
+            z-index: 1;
+        }
 
-.captcha-image img {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 10px;
-}
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #a67c52;
+            font-family: 'Roboto', Arial, sans-serif;
+            letter-spacing: 1px;
+        }
 
-.captcha-input {
-    width: calc(100% - 20px);
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    font-size: 14px;
-}
+        h1 {
+            margin: 0 0 15px;
+            color: #a67c52;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0 #fffbe6, 2px 2px 0 #bfa46d;
+        }
 
-.captcha-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    width: 100%;
-}
+        p {
+            color: #7c5e3c;
+            font-size: 13px;
+            margin-bottom: 18px;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
 
-.captcha-button:hover {
-    background-color: #45a049;
-}
+        .captcha-image img {
+            border: 2px solid #bfa46d;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            background: #f7e7ce;
+            box-shadow: 0 2px 8px rgba(80, 60, 20, 0.08);
+        }
 
+        .captcha-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 2px solid #bfa46d;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            background: #f7e7ce;
+            color: #7c5e3c;
+            font-family: 'Roboto', Arial, sans-serif;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .captcha-input:focus {
+            border-color: #a67c52;
+        }
+
+        .captcha-button {
+            background-color: #bfa46d;
+            color: #fffbe6;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            width: 100%;
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 0 #a67c52;
+            transition: background 0.2s;
+        }
+
+        .captcha-button:hover {
+            background-color: #a67c52;
+        }
     </style>
     <div class="captcha-container">
         <h1>CAPTCHA Verification</h1>
@@ -85,7 +123,7 @@ p {
             <input type="text" name="captcha" placeholder="Enter the text above" required class="captcha-input">
             <button type="submit" class="captcha-button">Submit</button>
         </form>
-        <div class="footer">Powered by FProxy</div>
+        <div class="footer">Powered by FProxy (iFanpS)</div>
     </div>
 </body>
 </html>

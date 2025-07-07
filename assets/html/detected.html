@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blocked</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f8;
-            color: #333;
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+            background: linear-gradient(135deg, #f7e7ce 0%, #e6cba8 100%);
+            min-height: 100vh;
             margin: 0;
             padding: 0;
             display: flex;
@@ -16,28 +17,54 @@
             justify-content: center;
             height: 100vh;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Grain effect overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            background: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
+            opacity: 0.18;
+            z-index: 0;
         }
         .container {
-            max-width: 600px;
+            max-width: 480px;
+            background: #fffbe6;
+            border: 3.5px solid #bfa46d;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(80, 60, 20, 0.18), 0 2px 0 #e6cba8;
+            padding: 36px 28px 32px 28px;
+            position: relative;
+            z-index: 1;
         }
         h1 {
-            font-size: 48px;
-            margin-bottom: 20px;
-            color: #ff1100;
+            font-size: 2.2rem;
+            margin-bottom: 18px;
+            color: #a67c52;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0 #fffbe6, 2px 2px 0 #bfa46d;
         }
         p {
-            font-size: 16px;
-            line-height: 1.6;
+            font-size: 15px;
+            color: #7c5e3c;
+            margin-bottom: 18px;
         }
         .error-code {
-            font-size: 20px;
-            color: #747272;
-            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #bfa46d;
+            margin-top: 24px;
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
         }
         .footer {
             margin-top: 40px;
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #a67c52;
+            font-family: 'Press Start 2P', 'Courier New', Courier, monospace;
+            letter-spacing: 1px;
         }
     </style>
 </head>

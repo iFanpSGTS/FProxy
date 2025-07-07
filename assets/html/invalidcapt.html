@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rate Limit Exceeded</title>
+    <title>Invalid Captcha</title>
     <style>
         body {
             font-family: 'Courier New', Courier, monospace;
@@ -13,58 +13,59 @@
             height: 100vh;
             margin: 0;
             /* Retro gradient background */
-            background: linear-gradient(135deg, #f7d9a0 0%, #e7a977 50%, #b07bac 100%);
+            background: linear-gradient(135deg, #f7e7ce 0%, #e6b07a 100%);
+            /* Subtle pattern overlay */
+            background-image:
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.07) 0 2px, transparent 2px 8px),
+                linear-gradient(135deg, #f7e7ce 0%, #e6b07a 100%);
         }
         .container {
             text-align: center;
             padding: 24px 32px;
-            border: 2px solid #b07bac;
+            border: 2px solid #b97a56;
             background: rgba(255, 255, 240, 0.95);
             border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(176, 123, 172, 0.15);
-            position: relative;
+            box-shadow: 0 4px 24px rgba(185, 122, 86, 0.15);
         }
         h1 {
-            font-size: 2.2em;
-            color: #b07bac;
-            text-shadow: 2px 2px 0 #fff8e1, 4px 4px 0 #e7a977;
+            font-size: 2em;
+            color: #b97a56;
             font-family: 'Courier New', Courier, monospace;
             letter-spacing: 2px;
+            text-shadow: 1px 1px 0 #fff8e1;
         }
         p {
-            margin: 18px 0;
-            color: #6d4c41;
-            font-size: 1.1em;
+            margin: 15px 0;
+            color: #7c5c3e;
         }
         button {
-            padding: 12px 28px;
+            padding: 10px 28px;
             font-size: 1em;
-            color: #fff8e1;
-            background: linear-gradient(90deg, #e7a977 0%, #b07bac 100%);
+            color: #fffbe7;
+            background: #b97a56;
             border: none;
-            border-radius: 6px;
+            border-radius: 5px;
             cursor: pointer;
             font-family: 'Courier New', Courier, monospace;
-            box-shadow: 2px 2px 0 #b07bac;
+            box-shadow: 0 2px 8px rgba(185, 122, 86, 0.10);
             transition: background 0.2s;
         }
         button:hover {
-            background: linear-gradient(90deg, #b07bac 0%, #e7a977 100%);
+            background: #7c5c3e;
         }
         .footer {
             margin-top: 40px;
             font-size: 14px;
-            color: #b07bac;
+            color: #b97a56;
             font-family: 'Courier New', Courier, monospace;
-            opacity: 0.8;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Rate Limit Exceeded</h1>
-        <p>You have exceeded the allowed number of requests. Please try again later.</p>
-        <button onclick="location.reload()">Retry</button>
+        <h1>Invalid inputing Captcha</h1>
+        <p>You have typed a wrong Captcha. please try again!</p>
+        <button onclick="location.pathname='Captcha'">Retry</button>
         <div class="footer">Powered by FProxy</div>
     </div>
 </body>

@@ -58,15 +58,15 @@ func CaptchaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	w.Header().Set("Content-Type", "text/html")
 	response, errs := LoadTemplate(map[string]interface{}{
 		"CaptchaID": key,
 		"CaptchaImg": img,
-	},)
-	if errs != nil {
-		http.Error(w, "Error showing captcha", http.StatusInternalServerError)
-		return
-	}
+		},)
+		if errs != nil {
+			http.Error(w, "Error showing captcha", http.StatusInternalServerError)
+			return
+		}
+	handler.SetCaptchaHeaders(w,r)
 	fmt.Fprint(w, response)
 }
 
@@ -87,16 +87,11 @@ func ValidateCaptchaHandler(w http.ResponseWriter, r *http.Request) {
 	captchaMu.Unlock()
 
 	if !exists || strings.TrimSpace(userInput) != expectedValue {
-		http.Error(w, "Invalid CAPTCHA, please try again.", http.StatusForbidden)
+		handler.RespondInvalidCaptcha(w, r)
 		return
 	}
 
 	// Set a short-lived cookie for CAPTCHA solving
-	http.SetCookie(w, &http.Cookie{
-		Name:    "captcha_solved",
-		Value:   "true",
-		Path:    "/",
-		Expires: time.Now().Add(1 * time.Minute), // Expires in 5 minutes
-	})
+	handler.SetCaptchaSolvedCookie(w)
 	http.Redirect(w, r, "/", http.StatusFound)
 }

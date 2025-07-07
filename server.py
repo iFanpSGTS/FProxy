@@ -1,15 +1,12 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
+#Create a simple server that listens on port 5000 and responds with "Hello, World!" to any request
 
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b'Hello, world!')
+from flask import Flask, jsonify
 
-def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler):
-    server_address = ('', 8000)
-    httpd = server_class(server_address, handler_class)
-    httpd.serve_forever()
+app = Flask(__name__)  
+@app.route('/')
 
-if __name__ == "__main__":
-    run()
+def hello_world():
+    return jsonify(message="Hello, World!")
+
+if __name__ == '__main__':
+    app.run("localhost", 8000)

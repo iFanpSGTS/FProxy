@@ -51,6 +51,7 @@ func ProxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Proxy logic
 	if !rl.AllowRequest(ip){
+		middleware.IncrementBlockedCount()
 		handler.RespondRatelimit(w, r)
 		return
 	}
