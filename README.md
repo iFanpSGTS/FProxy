@@ -18,6 +18,7 @@ Underdevelopment
 | Reverse proxy | :white_check_mark: Done |
 | Captcha | :white_check_mark: Done |
 | Ratelimit | :white_check_mark: Done |
+| Concurrent Limits | :white_check_mark: Done |
 | Custom Error Pages | :construction: In progress |
 | Custom Cookies | :hourglass: Not started |
 | Under Attack Mode (Stages) | :hourglass: Not started |
